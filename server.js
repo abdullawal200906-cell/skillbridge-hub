@@ -14,7 +14,7 @@ for (const method of ["get", "post", "put"]) {
     typeof h === "function" && h.constructor.name === "AsyncFunction"
       ? async (req, res, next) => {
           try { await h(req, res, next); }
-          catch (e) { console.error("route error:", req.path, e.message); if (!res.headersSent) res.status(503).json({ error: "The server is busy. Please try again in a moment." }); }
+          catch (e) { console.error("route error:", req.path, e.message); if (!res.headersSent) res.status(503).json({ error: "The server is busy. Please try again in a moment. (" + String(e.message).slice(0, 100) + ")" }); }
         }
       : h));
 }
@@ -678,9 +678,11 @@ app.get("/api/certificate/:id", limiter(30, 60 * 1000), async (req, res) => {
   res.json({ valid: true, cert: c });
 });
 
-app.get("/api/health", (_req, res) =>
-  res.json({ ok: true, jobApiConfigured: JSEARCH_KEYS.length > 0 || !!OWN_KEY, jobProviders: PROVIDERS.map((p) => p[0]), emailConfigured: !!(RESEND_API_KEY && EMAIL_TO), accounts: true, storage: USE_REDIS ? "database" : "files", aiProvider: AI_PROVIDER, tutorConfigured: AI_ENABLED, examGeneratorConfigured: AI_ENABLED, certSecretConfigured: !!process.env.CERT_SECRET })
-);
+app.get("/api/health", async (_req, res) => {
+  let database = "not used (local files)";
+  if (USE_REDIS) { try { await redis(["PING"]); database = "ok"; } catch (e) { database = "ERROR: " + String(e.message).slice(0, 120); } }
+  res.json({ database, ok: true, jobApiConfigured: JSEARCH_KEYS.length > 0 || !!OWN_KEY, jobProviders: PROVIDERS.map((p) => p[0]), emailConfigured: !!(RESEND_API_KEY && EMAIL_TO), accounts: true, storage: USE_REDIS ? "database" : "files", aiProvider: AI_PROVIDER, tutorConfigured: AI_ENABLED, examGeneratorConfigured: AI_ENABLED, certSecretConfigured: !!process.env.CERT_SECRET });
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`SkillBridge Hub running on http://localhost:${port} (AI: ${AI_PROVIDER})`));
