@@ -171,8 +171,8 @@
   }
   function logAct(type,skillId,text){act.unshift({t:Date.now(),type:type,skillId:skillId||"",text:text});if(act.length>200)act.length=200;save("sb4_act",act)}
   function ago(ts){var m=Math.round((Date.now()-ts)/60000);if(m<1)return "just now";if(m<60)return m+" min ago";var h=Math.round(m/60);if(h<24)return h+" hour"+(h===1?"":"s")+" ago";var d=Math.round(h/24);return d+" day"+(d===1?"":"s")+" ago"}
-  function apiPost(url,body){
-    return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){
+  function apiPost(url,body,extra){
+    return fetch(url,{method:"POST",headers:Object.assign({"Content-Type":"application/json"},extra||{}),body:JSON.stringify(body)}).then(function(r){
       return r.json().catch(function(){return {}}).then(function(d){
         if(!r.ok){var e=new Error(d.error||("Error "+r.status));e.status=r.status;e.api=!!d.error;throw e}
         return d;
@@ -826,7 +826,7 @@
   $("#tab-notes").addEventListener("change",function(e){if(e.target.id==="nFilter"){noteSkill=e.target.value;renderNoteList()}});
 
   /* ---------- accounts (real on a server, device-only profile in preview) ---------- */
-  var NAME_OK=/^[\p{L}][\p{L}\p{M} .'\-]{1,59}$/u,authMode=null,authTab="signin",authMsg="";
+  var NAME_OK=/^[\p{L}][\p{L}\p{M} .'\-]{1,59}$/u,authMode=null,authTab="signin",authMsg="",authCode="",authView="",authEmail="";
   function firstName(n){return String(n||"").split(" ")[0]}
   function renderHeader(){
     var b=$("#authBtn"),g=$("#greet"),f=auth?firstName(auth.user.name):"";
@@ -837,8 +837,39 @@
     $("#authModal").hidden=false;document.body.classList.add("modal-open");authMsg="";renderAuth();
     if(!authMode)fetch("/api/health").then(function(r){authMode=r.ok?"server":"local"}).catch(function(){authMode="local"}).then(renderAuth);
   }
-  function closeAuth(){$("#authModal").hidden=true;document.body.classList.remove("modal-open")}
+  function closeAuth(){authCode="";authView="";$("#authModal").hidden=true;document.body.classList.remove("modal-open")}
   function renderAuth(){
+    var b=$("#authBox");
+    if(authCode){
+      b.innerHTML='<h3 id="authTitle">Save your recovery code</h3><p class="note">If you ever forget your password, this code lets you set a new one. It is shown only once, so write it down or take a screenshot and keep it somewhere safe.</p><div class="why" style="text-align:center;font-size:1.35rem;font-weight:700;letter-spacing:.08em;user-select:all">'+esc(authCode)+'</div><div class="actions" style="margin-top:12px"><button class="btn ghost" id="authCopy" type="button">Copy code</button><button class="btn" id="authClose" type="button">I have saved it</button></div>';
+      return;
+    }
+    if(auth&&authView==="newcode"){
+      b.innerHTML='<h3 id="authTitle">Get a new recovery code</h3><p class="note">Enter your password. Your old recovery code will stop working.</p><form id="authForm" class="f" novalidate><label>Password<input id="aPass" type="password" autocomplete="current-password"></label><button class="btn" type="submit">Make new code</button><div class="note bad" id="authMsg" role="alert">'+esc(authMsg)+'</div></form><button class="save" id="authNewCancel" type="button" style="margin-top:8px">Cancel</button>';
+      return;
+    }
+    if(auth){
+      b.innerHTML='<h3 id="authTitle">Hello, '+esc(firstName(auth.user.name))+'</h3><p class="sub" style="margin:6px 0 12px">'+esc(auth.user.name)+(auth.user.email?'<br>'+esc(auth.user.email):'')+'</p><p class="note">'+(auth.mode==="server"?'Your progress, notes and certificates are saved to your account.':'Preview profile: saved on this device only.')+'</p><div class="actions"><button class="btn ghost" id="authOut">Sign out</button>'+(auth.mode==="server"?'<button class="save" id="authNew" type="button">New recovery code</button>':'')+'<button class="save" id="authClose">Close</button></div>';
+      return;
+    }
+    if(!authMode){b.innerHTML='<p>One moment...</p>';return}
+    var server=authMode==="server",su=authTab==="signup",fg=server&&authTab==="forgot";
+    b.innerHTML='<h3 id="authTitle">'+(fg?'Reset your password':(server?(su?'Create your account':'Sign in'):'Create your profile'))+'</h3>'+
+      (fg?'<p class="note">Enter your email, the recovery code you saved when you made your account, and a new password.</p>':(server?'<div class="tabs"><button type="button" data-atab="signin" aria-selected="'+(!su)+'">Sign in</button><button type="button" data-atab="signup" aria-selected="'+su+'">Create account</button></div>':'<p class="note">Preview mode: your profile is saved on this device only. On your own server, real accounts keep your progress on every device.</p>'))+
+      '<form id="authForm" class="f" novalidate>'+((su||!server)?'<label>Full name<input id="aName" autocomplete="name" maxlength="60" placeholder="e.g. Abdulhafiz Olorunfemi"></label>':'')+
+      (server?'<label>Email<input id="aEmail" type="email" autocomplete="email" value="'+esc(authEmail)+'"></label>':'')+
+      (fg?'<label>Recovery code<input id="aCode" autocomplete="off" autocapitalize="characters" maxlength="25" placeholder="ABCD-EFGH-JKLM-NPQR"></label>':'')+
+      (server?'<label>'+(fg?'New password (at least 8 characters)':'Password'+(su?' (at least 8 characters)':''))+'<input id="aPass" type="password" autocomplete="'+((su||fg)?'new-password':'current-password')+'"></label>':'')+
+      '<button class="btn" type="submit">'+(fg?'Reset password':(server?(su?'Create account':'Sign in'):'Continue'))+'</button>'+
+      (server&&!su&&!fg?'<button type="button" class="lnk" data-atab="forgot">Forgot password?</button>':'')+
+      (fg?'<button type="button" class="lnk" data-atab="signin">Back to sign in</button>':'')+
+      '<div class="note bad" id="authMsg" role="alert">'+esc(authMsg)+'</div></form><button class="save" id="authClose" style="margin-top:8px">Close</button>';
+  }
+  function copyCode(){
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(authCode).then(function(){toast("Code copied")}).catch(function(){toast("Press and hold the code to copy it")})}
+    else toast("Press and hold the code to copy it");
+  }
+  function renderAuthOld(){
     var b=$("#authBox");
     if(auth){
       b.innerHTML='<h3 id="authTitle">Hello, '+esc(firstName(auth.user.name))+'</h3><p class="sub" style="margin:6px 0 12px">'+esc(auth.user.name)+(auth.user.email?'<br>'+esc(auth.user.email):'')+'</p><p class="note">'+(auth.mode==="server"?'Your progress, notes and certificates are saved to your account.':'Preview profile: saved on this device only.')+'</p><div class="actions"><button class="btn ghost" id="authOut">Sign out</button><button class="save" id="authClose">Close</button></div>';
@@ -854,28 +885,42 @@
   }
   $("#authBox").addEventListener("click",function(e){
     var t=e.target,tb=t.closest("[data-atab]");
-    if(tb){authTab=tb.dataset.atab;authMsg="";renderAuth();return}
+    if(tb){if($("#aEmail"))authEmail=$("#aEmail").value;authTab=tb.dataset.atab;authMsg="";renderAuth();return}
     if(t.id==="authClose")closeAuth();
     if(t.id==="authOut")signOut(false);
+    if(t.id==="authNew"){authView="newcode";authMsg="";renderAuth()}
+    if(t.id==="authNewCancel"){authView="";authMsg="";renderAuth()}
+    if(t.id==="authCopy")copyCode();
   });
   $("#authBox").addEventListener("submit",function(e){e.preventDefault();doAuth()});
   $("#authBtn").addEventListener("click",openAuth);
   function doAuth(){
     var server=authMode==="server",su=authTab==="signup";
     var name=$("#aName")?String($("#aName").value||"").trim():"",email=$("#aEmail")?String($("#aEmail").value||"").trim():"",pw=$("#aPass")?String($("#aPass").value||""):"";
-    function fail(m){authMsg=m;renderAuth()}
+    function fail(m){authMsg=m;if(email)authEmail=email;renderAuth()}
+    if(auth&&authView==="newcode"){
+      if(!pw)return fail("Enter your password.");
+      return apiPost("/api/auth/recovery-code",{password:pw},{Authorization:"Bearer "+auth.token}).then(function(d){authView="";authCode=d.recoveryCode;authMsg="";renderAuth()}).catch(function(err){fail(err.message)});
+    }
+    if(server&&authTab==="forgot"){
+      var rcode=$("#aCode")?String($("#aCode").value||"").trim():"";
+      if(!/^\S+@\S+\.\S+$/.test(email))return fail("Enter your email address.");
+      if(rcode.replace(/[^A-Za-z0-9]/g,"").length!==16)return fail("Enter your 16-character recovery code.");
+      if(pw.length<8)return fail("Use a new password of at least 8 characters.");
+      return apiPost("/api/auth/reset",{email:email,code:rcode,password:pw}).then(function(d){signedIn({token:d.token,user:d.user,mode:"server"},d.recoveryCode)}).catch(function(err){fail(err.message)});
+    }
     if((su||!server)&&!NAME_OK.test(name))return fail("Enter your full name using letters only.");
     if(!server)return signedIn({token:"",user:{id:"local-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:name,email:""},mode:"local"});
     if(!/^\S+@\S+\.\S+$/.test(email))return fail("Enter a valid email address.");
     if(su&&pw.length<8)return fail("Use a password of at least 8 characters.");
     if(!pw)return fail("Enter your password.");
     apiPost(su?"/api/auth/register":"/api/auth/login",su?{name:name,email:email,password:pw}:{email:email,password:pw})
-      .then(function(d){signedIn({token:d.token,user:d.user,mode:"server"})}).catch(function(err){fail(err.message)});
+      .then(function(d){signedIn({token:d.token,user:d.user,mode:"server"},d.recoveryCode)}).catch(function(err){fail(err.message)});
   }
   function copyGuest(){Object.keys(SYNCMAP).forEach(function(k){var g=rawGet("u:guest:"+k);if(g!==undefined&&load(k,undefined)===undefined)save(k,g)})}
-  function signedIn(a){
+  function signedIn(a,rcode){
     auth=a;curUid=a.user.id;try{localStorage.setItem("sb_auth",JSON.stringify(a))}catch(e){}
-    function done(){closeAuth();reloadAll();toast("Welcome, "+firstName(a.user.name)+"!")}
+    function done(){if(rcode){authCode=rcode;authView="";authMsg="";renderAuth()}else closeAuth();reloadAll();toast("Welcome, "+firstName(a.user.name)+"!")}
     if(a.mode!=="server"){copyGuest();done();return}
     fetch("/api/state",{headers:{Authorization:"Bearer "+a.token}}).then(function(r){return r.ok?r.json():null}).then(function(d){
       if(d&&d.state&&Object.keys(d.state).length){Object.keys(SYNCMAP).forEach(function(k){var v=d.state[SYNCMAP[k]];if(v!==undefined)saveLocal(k,v)})}
