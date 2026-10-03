@@ -419,6 +419,22 @@ async function authed(req, res, next) {
 }
 const publicUser = (u) => ({ id: u.id, name: u.name, email: u.email });
 
+// Recovery codes: shown to the learner once, stored only as a salted hash (like a password).
+const RC_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0, 1, I or O, so nobody mixes them up
+const normCode = (c) => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+function newRecoveryCode() {
+  let s = "";
+  for (let i = 0; i < 16; i++) s += RC_ALPHABET[crypto.randomInt(RC_ALPHABET.length)];
+  return s.match(/.{4}/g).join("-");
+}
+async function setRecovery(user) { // returns the plain code to show once
+  const code = newRecoveryCode();
+  user.rcSalt = crypto.randomBytes(16).toString("hex");
+  user.rcHash = (await hashPw(normCode(code), user.rcSalt)).toString("hex");
+  return code;
+}
+const resetFails = new Map(); // email -> { n, until }: slows down people guessing codes
+
 app.post("/api/auth/register", limiter(8, 10 * 60 * 1000), async (req, res) => {
   const name = String(req.body?.name || "").trim();
   const email = String(req.body?.email || "").trim().toLowerCase().slice(0, 150);
@@ -430,9 +446,10 @@ app.post("/api/auth/register", limiter(8, 10 * 60 * 1000), async (req, res) => {
   if (users.some((u) => u.email === email)) return res.status(409).json({ error: "An account with this email already exists. Sign in instead." });
   const salt = crypto.randomBytes(16).toString("hex");
   const user = { id: crypto.randomUUID(), name, email, salt, hash: (await hashPw(password, salt)).toString("hex"), createdAt: new Date().toISOString() };
+  const recoveryCode = await setRecovery(user);
   users.push(user);
   await dbSet("users", users);
-  res.json({ token: makeToken(user.id), user: publicUser(user) });
+  res.json({ token: makeToken(user.id), user: publicUser(user), recoveryCode });
 });
 
 app.post("/api/auth/login", limiter(10, 10 * 60 * 1000), async (req, res) => {
@@ -444,7 +461,49 @@ app.post("/api/auth/login", limiter(10, 10 * 60 * 1000), async (req, res) => {
   if (!user) { await hashPw(password, "0".repeat(32)); return bad(); }
   const got = await hashPw(password, user.salt);
   if (!crypto.timingSafeEqual(got, Buffer.from(user.hash, "hex"))) return bad();
-  res.json({ token: makeToken(user.id), user: publicUser(user) });
+  let recoveryCode; // accounts made before this feature get their first code now
+  if (!user.rcHash) { recoveryCode = await setRecovery(user); await dbSet("users", users); }
+  res.json({ token: makeToken(user.id), user: publicUser(user), ...(recoveryCode ? { recoveryCode } : {}) });
+});
+
+// Forgot password: email + recovery code + new password. Signs the learner in and gives a fresh code.
+app.post("/api/auth/reset", limiter(8, 15 * 60 * 1000), async (req, res) => {
+  const email = String(req.body?.email || "").trim().toLowerCase().slice(0, 150);
+  const code = normCode(req.body?.code);
+  const password = String(req.body?.password || "");
+  if (!EMAIL_RE.test(email) || code.length !== 16) return res.status(400).json({ error: "Enter your email and your 16-character recovery code." });
+  if (password.length < 8 || password.length > 100) return res.status(400).json({ error: "Use a new password of at least 8 characters." });
+  const lock = resetFails.get(email);
+  if (lock && lock.until > Date.now()) return res.status(429).json({ error: "Too many wrong tries. Wait 15 minutes and try again." });
+  const users = await dbGet("users", []);
+  const user = users.find((u) => u.email === email);
+  const bad = () => {
+    const n = (resetFails.get(email)?.n || 0) + 1;
+    resetFails.set(email, n >= 5 ? { n: 0, until: Date.now() + 15 * 60 * 1000 } : { n, until: 0 });
+    return res.status(401).json({ error: "That email and recovery code do not match." });
+  };
+  if (!user || !user.rcHash) { await hashPw(code, "0".repeat(32)); return bad(); }
+  const got = await hashPw(code, user.rcSalt);
+  if (!crypto.timingSafeEqual(got, Buffer.from(user.rcHash, "hex"))) return bad();
+  resetFails.delete(email);
+  user.salt = crypto.randomBytes(16).toString("hex");
+  user.hash = (await hashPw(password, user.salt)).toString("hex");
+  const recoveryCode = await setRecovery(user); // the used code stops working
+  await dbSet("users", users);
+  res.json({ token: makeToken(user.id), user: publicUser(user), recoveryCode });
+});
+
+// Signed-in learner who lost their code: confirm the password, get a new code (the old one stops working).
+app.post("/api/auth/recovery-code", limiter(5, 10 * 60 * 1000), authed, async (req, res) => {
+  const password = String(req.body?.password || "");
+  const got = await hashPw(password, req.user.salt);
+  if (!crypto.timingSafeEqual(got, Buffer.from(req.user.hash, "hex"))) return res.status(401).json({ error: "Wrong password." });
+  const users = await dbGet("users", []);
+  const user = users.find((u) => u.id === req.user.id);
+  if (!user) return res.status(401).json({ error: "Account not found." });
+  const recoveryCode = await setRecovery(user);
+  await dbSet("users", users);
+  res.json({ recoveryCode });
 });
 
 app.get("/api/me", limiter(60, 60 * 1000), authed, (req, res) => res.json({ user: publicUser(req.user) }));
