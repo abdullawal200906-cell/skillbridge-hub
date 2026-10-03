@@ -1,0 +1,402 @@
+[
+ {
+  "q": "Which element best marks up the main navigation links of a page?",
+  "c": "<nav>",
+  "w": [
+   "<section>",
+   "<aside>",
+   "<menu>"
+  ],
+  "t": "nav is a landmark that tells browsers and screen readers this block holds main navigation."
+ },
+ {
+  "q": "What is the purpose of the alt attribute on an img tag?",
+  "c": "It describes the image for screen readers and when it fails to load",
+  "w": [
+   "It sets a hover tooltip only",
+   "It resizes the image",
+   "It links the image to another page"
+  ],
+  "t": "alt gives a text alternative. It helps accessibility and shows when the image cannot load."
+ },
+ {
+  "q": "Which input type validates that the value looks like an email address?",
+  "c": "type=\"email\"",
+  "w": [
+   "type=\"mail\"",
+   "type=\"text\" format=\"email\"",
+   "type=\"address\""
+  ],
+  "t": "type=\"email\" gives built-in validation and an email-friendly keyboard on phones."
+ },
+ {
+  "q": "How do you connect a label to its input so clicking the label focuses the input?",
+  "c": "Use for on the label that matches the input id",
+  "w": [
+   "Put both inside a div",
+   "Give them the same class",
+   "Use the name attribute on the label"
+  ],
+  "t": "label for=\"email\" with input id=\"email\" links them and helps screen readers announce the field."
+ },
+ {
+  "q": "Which tag is the semantic way to mark the main heading of the page?",
+  "c": "<h1>",
+  "w": [
+   "<header>",
+   "<title>",
+   "<strong>"
+  ],
+  "t": "h1 is the top-level heading. title goes in the head and sets the browser tab text."
+ },
+ {
+  "q": "Which heading order makes a good outline?",
+  "c": "h1, then h2, then h3 without skipping levels",
+  "w": [
+   "h3, h1, h2",
+   "h1 for every heading",
+   "h6 first because it is smallest"
+  ],
+  "t": "Headings form an outline. Skipping levels confuses assistive technology users."
+ },
+ {
+  "q": "What does the viewport meta tag do?",
+  "c": "Controls how the page scales on mobile screens",
+  "w": [
+   "Sets the page title",
+   "Loads a mobile-only stylesheet",
+   "Blocks desktop browsers"
+  ],
+  "t": "meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" makes layouts use the real screen width on phones."
+ },
+ {
+  "q": "Which is the safe way to open a link in a new tab?",
+  "c": "target=\"_blank\" with rel=\"noopener noreferrer\"",
+  "w": [
+   "target=\"new\" only",
+   "href=\"_blank\"",
+   "rel=\"newtab\""
+  ],
+  "t": "noopener stops the new page from controlling the old one through window.opener."
+ },
+ {
+  "q": "What is the difference between b and strong?",
+  "c": "strong means important, b only makes text bold",
+  "w": [
+   "They are identical in meaning",
+   "b means important, strong is only visual",
+   "strong cannot be styled"
+  ],
+  "t": "strong carries meaning (importance). b is purely stylistic."
+ },
+ {
+  "q": "Which element holds a self-contained piece, like a blog post, that makes sense on its own?",
+  "c": "<article>",
+  "w": [
+   "<div>",
+   "<aside>",
+   "<span>"
+  ],
+  "t": "article is for independent content such as a post, comment or news item."
+ },
+ {
+  "q": "What does <!DOCTYPE html> do?",
+  "c": "Tells the browser to use standards mode",
+  "w": [
+   "Imports the HTML library",
+   "Sets the page language",
+   "Adds a security header"
+  ],
+  "t": "Without it, browsers may use quirks mode and render pages in old, inconsistent ways."
+ },
+ {
+  "q": "How do you set the page language for screen readers and translation tools?",
+  "c": "Add lang to the html element",
+  "w": [
+   "Add language to the body",
+   "Add charset to the head",
+   "Add dir to the html element"
+  ],
+  "t": "html lang=\"en\" helps screen readers pronounce words correctly and helps browsers offer translation."
+ },
+ {
+  "q": "What does the meta charset UTF-8 tag do?",
+  "c": "Lets the browser read a wide range of characters correctly",
+  "w": [
+   "Compresses the page",
+   "Encrypts the page",
+   "Sets the font"
+  ],
+  "t": "UTF-8 supports almost all languages and symbols. Without it you may see broken characters."
+ },
+ {
+  "q": "Which element wraps the header rows of a table?",
+  "c": "<thead>",
+  "w": [
+   "<th>",
+   "<head>",
+   "<header>"
+  ],
+  "t": "thead groups header rows, tbody the body rows and tfoot the footer rows. th is a single header cell."
+ },
+ {
+  "q": "Which element should you use for an action that does not navigate to a new page?",
+  "c": "<button>",
+  "w": [
+   "<a href=\"#\">",
+   "<div onclick>",
+   "<span role=\"link\">"
+  ],
+  "t": "button is keyboard-focusable and announced correctly by default. Use links for navigation."
+ },
+ {
+  "q": "What does the required attribute do on an input?",
+  "c": "Blocks form submission until the field has a value",
+  "w": [
+   "Hides the field",
+   "Encrypts the value",
+   "Makes the field read-only"
+  ],
+  "t": "It uses built-in browser validation. Always validate on the server too."
+ },
+ {
+  "q": "Which attribute tells the browser to delay loading offscreen images?",
+  "c": "loading=\"lazy\"",
+  "w": [
+   "defer",
+   "async",
+   "preload=\"lazy\""
+  ],
+  "t": "loading=\"lazy\" loads images when they get close to the viewport, saving data."
+ },
+ {
+  "q": "What is srcset on an img tag for?",
+  "c": "Letting the browser choose an image size that fits the screen",
+  "w": [
+   "Setting the alternative text",
+   "Linking to a sitemap",
+   "Adding captions"
+  ],
+  "t": "srcset offers several files so phones do not download huge desktop images."
+ },
+ {
+  "q": "Which pair of elements groups an image with its caption?",
+  "c": "<figure> and <figcaption>",
+  "w": [
+   "<picture> and <caption>",
+   "<image> and <label>",
+   "<div> and <small>"
+  ],
+  "t": "figure and figcaption link a visual with its caption semantically."
+ },
+ {
+  "q": "What is wrong with <a href=\"page.html\"><button>Go</button></a>?",
+  "c": "Interactive elements should not be nested inside each other",
+  "w": [
+   "Nothing, it is best practice",
+   "Buttons cannot contain text",
+   "href must be absolute"
+  ],
+  "t": "Nesting interactive elements is invalid and creates confusing keyboard and screen reader behavior."
+ },
+ {
+  "q": "Which attribute hides purely decorative content from screen readers?",
+  "c": "aria-hidden=\"true\"",
+  "w": [
+   "aria-label=\"none\"",
+   "role=\"hidden\"",
+   "aria-disabled=\"true\""
+  ],
+  "t": "aria-hidden removes an element from the accessibility tree. Never use it on focusable elements."
+ },
+ {
+  "q": "What is the difference between id and class?",
+  "c": "An id must be unique on a page, a class can be reused",
+  "w": [
+   "A class must be unique, an id can be reused",
+   "They are the same",
+   "id works only in CSS"
+  ],
+  "t": "Use id for one-of-a-kind hooks and class for repeated styling."
+ },
+ {
+  "q": "Which pair groups related form controls with a caption for accessibility?",
+  "c": "<fieldset> and <legend>",
+  "w": [
+   "<group> and <title>",
+   "<div> and <caption>",
+   "<section> and <label>"
+  ],
+  "t": "fieldset and legend give related controls, like radio buttons, an accessible group name."
+ },
+ {
+  "q": "Radio buttons belong to the same group when they share...",
+  "c": "the same name attribute",
+  "w": [
+   "the same id",
+   "the same value",
+   "the same class"
+  ],
+  "t": "Only one radio with the same name can be selected at a time."
+ },
+ {
+  "q": "What does the defer attribute do on a script in the head?",
+  "c": "Downloads in parallel and runs after the HTML is parsed",
+  "w": [
+   "Runs the script before any HTML",
+   "Delays the script by 10 seconds",
+   "Prevents the script from running"
+  ],
+  "t": "defer scripts run in order after parsing. async scripts run as soon as they download, in any order."
+ },
+ {
+  "q": "Which is the correct HTML comment?",
+  "c": "<!-- comment -->",
+  "w": [
+   "// comment",
+   "/* comment */",
+   "# comment"
+  ],
+  "t": "HTML uses <!-- -->. The others belong to JavaScript, CSS or other languages."
+ },
+ {
+  "q": "Which element is for content related to the main content, like a sidebar?",
+  "c": "<aside>",
+  "w": [
+   "<footer>",
+   "<nav>",
+   "<main>"
+  ],
+  "t": "aside marks side content such as related links or notes."
+ },
+ {
+  "q": "How many visible main elements should a page normally have?",
+  "c": "One",
+  "w": [
+   "Two or more",
+   "None",
+   "One per section"
+  ],
+  "t": "main identifies the dominant content of the page. Only one visible main is allowed."
+ },
+ {
+  "q": "Which pair creates a drop-down list?",
+  "c": "<select> and <option>",
+  "w": [
+   "<dropdown> and <item>",
+   "<list> and <li>",
+   "<input type=\"dropdown\"> and <value>"
+  ],
+  "t": "select with option elements creates a drop-down control."
+ },
+ {
+  "q": "What does meta name=\"description\" influence?",
+  "c": "The summary search engines may show under your page title",
+  "w": [
+   "The page speed",
+   "The page color",
+   "The browser cache"
+  ],
+  "t": "It is not a ranking guarantee, but a good description can improve clicks from search results."
+ },
+ {
+  "q": "What is the correct way to make a phone number tappable on mobile?",
+  "c": "<a href=\"tel:+2348012345678\">",
+  "w": [
+   "<a href=\"phone:08012345678\">",
+   "<phone>08012345678</phone>",
+   "<a href=\"call:08012345678\">"
+  ],
+  "t": "The tel: scheme asks a phone to start a call."
+ },
+ {
+  "q": "Which statement about the placeholder attribute is true?",
+  "c": "It is not a replacement for a label",
+  "w": [
+   "It replaces the label",
+   "It is submitted with the form",
+   "It is required for validation"
+  ],
+  "t": "Placeholders disappear and often have low contrast. Always use a real label."
+ },
+ {
+  "q": "Which input attribute checks a value against a regular expression?",
+  "c": "pattern",
+  "w": [
+   "regex",
+   "match",
+   "format"
+  ],
+  "t": "pattern uses a regular expression for built-in validation."
+ },
+ {
+  "q": "What happens if you forget the closing tag of a p element in HTML5?",
+  "c": "The browser usually closes it when the next block element starts",
+  "w": [
+   "The page will not load",
+   "All text turns bold",
+   "The server throws an error"
+  ],
+  "t": "Browsers are forgiving, but clean, valid HTML avoids surprises."
+ },
+ {
+  "q": "Which element lets you offer different image files for different formats or screen sizes?",
+  "c": "<picture>",
+  "w": [
+   "<figure>",
+   "<canvas>",
+   "<frame>"
+  ],
+  "t": "picture with source elements lets the browser pick the best image or format."
+ },
+ {
+  "q": "What is the noscript element for?",
+  "c": "Content shown when JavaScript is disabled",
+  "w": [
+   "Blocking scripts",
+   "Marking code that must not run",
+   "Hiding content from search engines"
+  ],
+  "t": "Use it to give a fallback message or content when scripts cannot run."
+ },
+ {
+  "q": "A button inside a form should not submit it. Which attribute do you use?",
+  "c": "type=\"button\"",
+  "w": [
+   "type=\"cancel\"",
+   "submit=\"false\"",
+   "disabled=\"submit\""
+  ],
+  "t": "Buttons in forms default to type=\"submit\". Set type=\"button\" for other actions."
+ },
+ {
+  "q": "What does the autocomplete attribute help with?",
+  "c": "Lets browsers fill in known values such as name or email",
+  "w": [
+   "Finishes your sentences with AI",
+   "Disables form validation",
+   "Loads data from a server"
+  ],
+  "t": "Correct autocomplete values improve usability and accessibility."
+ },
+ {
+  "q": "Which markup embeds a video with playback controls?",
+  "c": "<video src=\"clip.mp4\" controls></video>",
+  "w": [
+   "<media src=\"clip.mp4\" play></media>",
+   "<movie src=\"clip.mp4\"></movie>",
+   "<embed controls=\"clip.mp4\">"
+  ],
+  "t": "video supports built-in controls, captions with track, and multiple sources."
+ },
+ {
+  "q": "Which is the best link text?",
+  "c": "Read our 2026 pricing guide",
+  "w": [
+   "Click here",
+   "Link",
+   "More"
+  ],
+  "t": "Descriptive link text helps screen reader users who jump between links, and it helps SEO."
+ }
+]

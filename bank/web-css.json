@@ -1,0 +1,392 @@
+[
+ {
+  "q": "Which selector has the highest specificity?",
+  "c": "#menu",
+  "w": [
+   ".menu",
+   "div",
+   "div.menu"
+  ],
+  "t": "Specificity order: inline styles, then ids, then classes and attributes, then elements."
+ },
+ {
+  "q": "With box-sizing: content-box, width 200px, padding 20px and border 5px, what is the total width?",
+  "c": "250px",
+  "w": [
+   "200px",
+   "225px",
+   "240px"
+  ],
+  "t": "content-box adds padding and border to width: 200 + 2x20 + 2x5 = 250."
+ },
+ {
+  "q": "With box-sizing: border-box, width 200px, padding 20px and border 5px, what is the total width?",
+  "c": "200px",
+  "w": [
+   "250px",
+   "230px",
+   "245px"
+  ],
+  "t": "border-box includes padding and border inside the width."
+ },
+ {
+  "q": "Which flexbox property aligns items along the main axis?",
+  "c": "justify-content",
+  "w": [
+   "align-items",
+   "align-content",
+   "flex-wrap"
+  ],
+  "t": "justify-content works on the main axis, align-items on the cross axis."
+ },
+ {
+  "q": "What does flex: 1 usually mean?",
+  "c": "The item grows to share the available space",
+  "w": [
+   "The item is 1px wide",
+   "The item cannot shrink",
+   "The item is hidden"
+  ],
+  "t": "flex: 1 is shorthand for grow 1, shrink 1, basis 0, so items share space equally."
+ },
+ {
+  "q": "Which declaration makes a responsive grid with columns at least 200px wide that fill the row?",
+  "c": "grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))",
+  "w": [
+   "grid-columns: 200px auto",
+   "display: columns(200px)",
+   "grid-template: fit(200px)"
+  ],
+  "t": "repeat(auto-fit, minmax()) creates as many columns as fit, each at least 200px."
+ },
+ {
+  "q": "What does position: sticky do?",
+  "c": "Acts like relative until a scroll threshold, then sticks",
+  "w": [
+   "Fixes the element to the page forever",
+   "Removes it from normal flow",
+   "Makes it float"
+  ],
+  "t": "Sticky elements stay in view inside their container once you scroll past a set offset."
+ },
+ {
+  "q": "Which position value places an element relative to its nearest positioned ancestor?",
+  "c": "absolute",
+  "w": [
+   "relative",
+   "static",
+   "sticky"
+  ],
+  "t": "absolute removes the element from flow and positions it against the nearest ancestor with a position other than static."
+ },
+ {
+  "q": "Which unit is relative to the root element's font size?",
+  "c": "rem",
+  "w": [
+   "em",
+   "px",
+   "vh"
+  ],
+  "t": "rem uses the root font size. em uses the parent's font size."
+ },
+ {
+  "q": "What is the difference between display: none and visibility: hidden?",
+  "c": "none removes the element from layout, hidden keeps its space",
+  "w": [
+   "They are identical",
+   "hidden removes layout, none keeps it",
+   "none only works on images"
+  ],
+  "t": "With visibility: hidden the box still takes up space."
+ },
+ {
+  "q": "Which media query targets screens at most 600px wide?",
+  "c": "@media (max-width: 600px)",
+  "w": [
+   "@media (min-width: 600px)",
+   "@media screen < 600",
+   "@media (width-max: 600)"
+  ],
+  "t": "max-width applies up to and including that width."
+ },
+ {
+  "q": "What is mobile-first CSS?",
+  "c": "Base styles for small screens, then min-width queries for larger screens",
+  "w": [
+   "Only supporting phones",
+   "Using max-width queries everywhere",
+   "Hiding desktop content"
+  ],
+  "t": "Mobile-first keeps the base styles simple and adds complexity as space allows."
+ },
+ {
+  "q": "What does margin: 0 auto do to a block element with a set width?",
+  "c": "Centers it horizontally",
+  "w": [
+   "Centers it vertically",
+   "Removes all spacing",
+   "Aligns it to the right"
+  ],
+  "t": "Auto left and right margins split the leftover space equally."
+ },
+ {
+  "q": "What is margin collapsing?",
+  "c": "Vertical margins of adjacent blocks combining into one",
+  "w": [
+   "Margins disappearing on mobile",
+   "Margin turning into padding",
+   "Margins overflowing the parent"
+  ],
+  "t": "When two vertical margins touch, the larger one wins instead of adding up."
+ },
+ {
+  "q": "Which property controls the stacking order of positioned elements?",
+  "c": "z-index",
+  "w": [
+   "stack-order",
+   "layer",
+   "order"
+  ],
+  "t": "Higher z-index values sit on top, within the same stacking context."
+ },
+ {
+  "q": "Which pseudo-class styles a link while the pointer is over it?",
+  "c": ":hover",
+  "w": [
+   ":active",
+   ":focus-within",
+   ":visited"
+  ],
+  "t": ":hover matches while the pointer is over an element. :active matches while it is being pressed."
+ },
+ {
+  "q": "What does :nth-child(2n) select?",
+  "c": "Every even child",
+  "w": [
+   "Only the second child",
+   "Every third child",
+   "Every odd child"
+  ],
+  "t": "2n matches 2, 4, 6 and so on."
+ },
+ {
+  "q": "Which option hides an element from everyone, including screen readers?",
+  "c": "display: none",
+  "w": [
+   "clip with absolute positioning",
+   "A visually-hidden class",
+   "opacity: 0.01"
+  ],
+  "t": "display: none removes the element from layout and the accessibility tree."
+ },
+ {
+  "q": "Which property creates a smooth change between states, such as on hover?",
+  "c": "transition",
+  "w": [
+   "animation-name",
+   "transform-style",
+   "change"
+  ],
+  "t": "transition animates property changes over a duration."
+ },
+ {
+  "q": "How do animations differ from transitions?",
+  "c": "Animations use keyframes and can run without a state change",
+  "w": [
+   "Transitions use keyframes",
+   "They are identical",
+   "Animations only work on color"
+  ],
+  "t": "Keyframe animations can loop, run automatically and have many steps."
+ },
+ {
+  "q": "Which property is the most performance-friendly to animate?",
+  "c": "transform",
+  "w": [
+   "width",
+   "top",
+   "margin-left"
+  ],
+  "t": "transform and opacity can be handled by the GPU without recalculating layout."
+ },
+ {
+  "q": "What does the cascade decide?",
+  "c": "Which rule wins when several rules target the same element",
+  "w": [
+   "How images are stacked",
+   "How fonts are loaded",
+   "How grids wrap"
+  ],
+  "t": "The order of precedence is importance, then specificity, then source order."
+ },
+ {
+  "q": "What does !important do?",
+  "c": "Overrides normal specificity for that declaration",
+  "w": [
+   "Makes the page load first",
+   "Marks code for review",
+   "Disables inheritance"
+  ],
+  "t": "Overusing it makes CSS hard to maintain."
+ },
+ {
+  "q": "Which property is inherited by default?",
+  "c": "color",
+  "w": [
+   "margin",
+   "border",
+   "padding"
+  ],
+  "t": "Text properties like color and font-family inherit. Box properties like margin and border do not."
+ },
+ {
+  "q": "How do you use a custom property named --brand?",
+  "c": "Define --brand: teal; and use var(--brand)",
+  "w": [
+   "Define $brand: teal; and use $brand",
+   "Use @brand teal;",
+   "Define brand = teal in JavaScript"
+  ],
+  "t": "CSS variables are custom properties that can be read with var()."
+ },
+ {
+  "q": "What is true about em units for font-size?",
+  "c": "They are relative to the parent element's font size",
+  "w": [
+   "They always equal 16px",
+   "They equal the viewport height",
+   "They are relative to the root"
+  ],
+  "t": "em compounds when nested. rem avoids that by using the root."
+ },
+ {
+  "q": "Which declaration makes an element a flex container?",
+  "c": "display: flex",
+  "w": [
+   "flex: container",
+   "position: flex",
+   "flex-direction: on"
+  ],
+  "t": "display: flex enables flexbox layout for the direct children."
+ },
+ {
+  "q": "What does gap do in flex or grid layouts?",
+  "c": "Adds space between items",
+  "w": [
+   "Removes margins",
+   "Sets the column count",
+   "Adds a border"
+  ],
+  "t": "gap is cleaner than margins because it only adds space between items."
+ },
+ {
+  "q": "Which declaration lets flex items wrap onto new lines?",
+  "c": "flex-wrap: wrap",
+  "w": [
+   "flex-flow: none",
+   "overflow: wrap",
+   "align-items: wrap"
+  ],
+  "t": "By default flex items stay on one line and may shrink."
+ },
+ {
+  "q": "How do you make a grid item span two columns?",
+  "c": "grid-column: span 2",
+  "w": [
+   "column-count: 2",
+   "grid-span: 2",
+   "width: span 2"
+  ],
+  "t": "grid-column: span 2 makes the item cover two column tracks."
+ },
+ {
+  "q": "What does object-fit: cover do on an image?",
+  "c": "Fills the box and crops overflow while keeping the aspect ratio",
+  "w": [
+   "Stretches the image to fit",
+   "Shrinks the image to fit entirely",
+   "Repeats the image"
+  ],
+  "t": "cover fills the box without distortion, cropping what does not fit."
+ },
+ {
+  "q": "Which combination truncates a single line of text with an ellipsis?",
+  "c": "overflow: hidden; white-space: nowrap; text-overflow: ellipsis",
+  "w": [
+   "overflow: scroll; text-wrap: none",
+   "text-overflow: ellipsis only",
+   "word-break: ellipsis"
+  ],
+  "t": "All three are needed: hide overflow, stop wrapping and request the ellipsis."
+ },
+ {
+  "q": "What does @media (prefers-color-scheme: dark) detect?",
+  "c": "Whether the user's system is set to dark mode",
+  "w": [
+   "Whether images are dark",
+   "Whether the screen is black",
+   "Which font is installed"
+  ],
+  "t": "It lets your CSS follow the user's light or dark preference."
+ },
+ {
+  "q": "What does clamp(1rem, 4vw, 2rem) do?",
+  "c": "Picks a fluid value between a minimum and a maximum",
+  "w": [
+   "Rounds to the nearest integer",
+   "Repeats a value",
+   "Always returns 4vw"
+  ],
+  "t": "The value grows with 4vw but never goes below 1rem or above 2rem."
+ },
+ {
+  "q": "Which selector matches only direct children?",
+  "c": "ul > li",
+  "w": [
+   "ul li",
+   "ul + li",
+   "ul ~ li"
+  ],
+  "t": "Descendant is a space, child is >, adjacent sibling is + and general sibling is ~."
+ },
+ {
+  "q": "What does the selector a[href^=\"https\"] match?",
+  "c": "Links whose href starts with https",
+  "w": [
+   "Links whose href ends with https",
+   "Links containing https anywhere",
+   "Links without https"
+  ],
+  "t": "^= means starts with, $= means ends with and *= means contains."
+ },
+ {
+  "q": "Which property changes the visual order of flex items without changing the HTML?",
+  "c": "order",
+  "w": [
+   "flex-order",
+   "z-index",
+   "sort"
+  ],
+  "t": "order changes visual order only. Keyboard and screen reader order still follow the HTML."
+ },
+ {
+  "q": "What is :focus-visible useful for?",
+  "c": "Showing focus styles mainly for keyboard users",
+  "w": [
+   "Hiding the cursor",
+   "Detecting visible text",
+   "Loading images when focused"
+  ],
+  "t": "It avoids showing focus rings on mouse clicks while keeping them for keyboard navigation."
+ },
+ {
+  "q": "What does line-height: 1.5 without a unit mean?",
+  "c": "1.5 times the element's own font size",
+  "w": [
+   "1.5 pixels",
+   "150% of the parent's height",
+   "1.5 viewport heights"
+  ],
+  "t": "Unitless values scale with the font size and inherit well."
+ }
+]

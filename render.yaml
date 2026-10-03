@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: skillbridge-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: CERT_SECRET
+        generateValue: true
+      - key: JOB_API_KEY
+        sync: false
+      - key: JOB_COUNTRY
+        value: ng
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_TO
+        value: lawalolorunifemi@gmail.com
+      - key: PUBLIC_URL
+        sync: false

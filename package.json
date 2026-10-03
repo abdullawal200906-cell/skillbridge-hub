@@ -1,0 +1,19 @@
+{
+  "name": "skillbridge-hub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch --env-file=.env server.js",
+    "build": "node scripts/build.mjs",
+    "check": "node --env-file=.env scripts/check.mjs",
+    "secret": "node scripts/secret.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

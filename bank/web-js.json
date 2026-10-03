@@ -1,0 +1,382 @@
+[
+ {
+  "q": "What does typeof null return?",
+  "c": "\"object\"",
+  "w": [
+   "\"null\"",
+   "\"undefined\"",
+   "\"number\""
+  ],
+  "t": "This is a long-standing quirk of JavaScript. Check for null with === null."
+ },
+ {
+  "q": "What is the result of 0.1 + 0.2 === 0.3?",
+  "c": "false",
+  "w": [
+   "true",
+   "NaN",
+   "An error"
+  ],
+  "t": "Floating point rounding makes 0.1 + 0.2 equal 0.30000000000000004."
+ },
+ {
+  "q": "What does === do that == does not?",
+  "c": "Compares without type conversion",
+  "w": [
+   "Compares only strings",
+   "Compares references only",
+   "Assigns a value"
+  ],
+  "t": "=== is strict equality. == converts types first, which can surprise you."
+ },
+ {
+  "q": "What does console.log([] + []) print?",
+  "c": "An empty string",
+  "w": [
+   "[]",
+   "0",
+   "undefined"
+  ],
+  "t": "Both arrays convert to empty strings, and joining them gives an empty string."
+ },
+ {
+  "q": "What does typeof NaN return?",
+  "c": "\"number\"",
+  "w": [
+   "\"NaN\"",
+   "\"undefined\"",
+   "\"object\""
+  ],
+  "t": "NaN means not-a-number, but its type is number."
+ },
+ {
+  "q": "Which keyword declares a binding that cannot be reassigned?",
+  "c": "const",
+  "w": [
+   "let",
+   "var",
+   "static"
+  ],
+  "t": "const prevents reassigning the binding, but an object's contents can still change."
+ },
+ {
+  "q": "What is hoisting?",
+  "c": "Declarations are processed before code runs, so some can be used earlier",
+  "w": [
+   "Moving code to the server",
+   "Lifting HTML into JavaScript",
+   "Sorting arrays"
+  ],
+  "t": "var is hoisted and starts as undefined. let and const sit in a temporal dead zone until declared."
+ },
+ {
+  "q": "What does this print? for (var i = 0; i < 3; i++) { setTimeout(() => console.log(i), 0) }",
+  "c": "3 3 3",
+  "w": [
+   "0 1 2",
+   "0 0 0",
+   "undefined three times"
+  ],
+  "t": "var is function-scoped, so all callbacks share one i, which is 3 when they run. With let you get 0 1 2."
+ },
+ {
+  "q": "Which array method returns a new array of the items that pass a test?",
+  "c": "filter",
+  "w": [
+   "map",
+   "reduce",
+   "forEach"
+  ],
+  "t": "filter keeps items where the callback returns a truthy value."
+ },
+ {
+  "q": "What does map return?",
+  "c": "A new array with each item transformed",
+  "w": [
+   "The original array changed",
+   "A single value",
+   "Nothing"
+  ],
+  "t": "map does not change the original array."
+ },
+ {
+  "q": "What does reduce do?",
+  "c": "Combines items into a single value",
+  "w": [
+   "Removes duplicates",
+   "Sorts items",
+   "Shortens the array"
+  ],
+  "t": "reduce passes an accumulator through the array and returns the final value."
+ },
+ {
+  "q": "What does forEach return?",
+  "c": "undefined",
+  "w": [
+   "A new array",
+   "The original array",
+   "true"
+  ],
+  "t": "forEach is for side effects. Use map when you need a new array."
+ },
+ {
+  "q": "What is a closure?",
+  "c": "A function that remembers variables from its outer scope",
+  "w": [
+   "A function that ends the program",
+   "A private class",
+   "A sealed object"
+  ],
+  "t": "Closures let inner functions keep access to outer variables even after the outer function has returned."
+ },
+ {
+  "q": "Inside an arrow function, where does this come from?",
+  "c": "The surrounding scope",
+  "w": [
+   "Always the global object",
+   "Always undefined",
+   "The function itself"
+  ],
+  "t": "Arrow functions do not have their own this. They use the one from where they were created."
+ },
+ {
+  "q": "What does async/await make easier?",
+  "c": "Writing promise-based code that reads top to bottom",
+  "w": [
+   "Running code on multiple CPU cores",
+   "Blocking the main thread",
+   "Avoiding all errors"
+  ],
+  "t": "async and await are syntax on top of promises."
+ },
+ {
+  "q": "What does await do inside an async function?",
+  "c": "Pauses that function until the promise settles",
+  "w": [
+   "Blocks the whole browser",
+   "Cancels the promise",
+   "Runs the promise twice"
+  ],
+  "t": "Other code keeps running while the function waits."
+ },
+ {
+  "q": "What does fetch() return?",
+  "c": "A promise that resolves to a Response",
+  "w": [
+   "The JSON data directly",
+   "A string",
+   "An XMLHttpRequest"
+  ],
+  "t": "You then call response.json() or response.text() to read the body."
+ },
+ {
+  "q": "Why do you often call response.json()?",
+  "c": "To parse the response body as JSON, which is also asynchronous",
+  "w": [
+   "To send JSON to the server",
+   "To validate headers",
+   "To cancel the request"
+  ],
+  "t": "response.json() returns a promise that resolves to the parsed data."
+ },
+ {
+  "q": "Does fetch reject its promise on an HTTP 404?",
+  "c": "No, it only rejects on network failure, so check response.ok",
+  "w": [
+   "Yes, always",
+   "Only for 500 errors",
+   "Only inside try/catch"
+  ],
+  "t": "A 404 is still a valid HTTP response. Check response.ok or response.status."
+ },
+ {
+  "q": "What is event delegation?",
+  "c": "Listening on a parent to handle events from its children",
+  "w": [
+   "Removing all event listeners",
+   "Sending events to a server",
+   "Cloning elements"
+  ],
+  "t": "It uses bubbling, and works for elements added later."
+ },
+ {
+  "q": "How do you stop a form's default submit behavior?",
+  "c": "event.preventDefault()",
+  "w": [
+   "event.stopPropagation()",
+   "event.stopDefault()",
+   "return null"
+  ],
+  "t": "preventDefault cancels the browser's default action for the event."
+ },
+ {
+  "q": "What does event.stopPropagation() do?",
+  "c": "Stops the event from bubbling to parent elements",
+  "w": [
+   "Cancels the browser's default action",
+   "Removes the listener",
+   "Runs only the capture phase"
+  ],
+  "t": "It does not cancel the default action. That is preventDefault."
+ },
+ {
+  "q": "Which call selects an element with id \"app\"?",
+  "c": "document.getElementById(\"app\")",
+  "w": [
+   "document.getElement(\"#app\")",
+   "document.find(\"app\")",
+   "window.id(\"app\")"
+  ],
+  "t": "getElementById takes the id without a hash. querySelector(\"#app\") also works."
+ },
+ {
+  "q": "What does querySelectorAll return?",
+  "c": "A static NodeList",
+  "w": [
+   "A live HTMLCollection",
+   "A single element",
+   "A real array"
+  ],
+  "t": "A NodeList has forEach but not map. Use Array.from to convert it."
+ },
+ {
+  "q": "Which property inserts text without parsing it as HTML?",
+  "c": "textContent",
+  "w": [
+   "innerHTML",
+   "outerHTML",
+   "insertAdjacentHTML"
+  ],
+  "t": "textContent treats the value as plain text, which is safer."
+ },
+ {
+  "q": "Why is innerHTML with user input risky?",
+  "c": "It can run injected HTML or scripts (XSS)",
+  "w": [
+   "It is slower than CSS",
+   "It deletes the DOM",
+   "It only works on divs"
+  ],
+  "t": "Never insert untrusted input as HTML. Use textContent or sanitize."
+ },
+ {
+  "q": "What does JSON.stringify do?",
+  "c": "Converts a value to a JSON string",
+  "w": [
+   "Parses JSON into an object",
+   "Sorts object keys",
+   "Encrypts data"
+  ],
+  "t": "JSON.parse does the opposite."
+ },
+ {
+  "q": "What is the result of \"5\" + 3?",
+  "c": "\"53\"",
+  "w": [
+   "8",
+   "NaN",
+   "\"8\""
+  ],
+  "t": "With a string on one side, + joins text. \"5\" - 3 would give 2."
+ },
+ {
+  "q": "What does [...a, ...b] do?",
+  "c": "Copies items from both arrays into a new array",
+  "w": [
+   "Deletes both arrays",
+   "Merges objects in place",
+   "Sorts the arrays"
+  ],
+  "t": "The spread operator expands iterables into individual items."
+ },
+ {
+  "q": "What does const { name } = user do?",
+  "c": "Extracts the name property into a variable",
+  "w": [
+   "Deletes the name property",
+   "Clones the user class",
+   "Sorts the properties"
+  ],
+  "t": "This is object destructuring."
+ },
+ {
+  "q": "Which statement about let and const is true?",
+  "c": "Both are block-scoped",
+  "w": [
+   "Both are function-scoped",
+   "let is not hoisted at all",
+   "const makes objects immutable"
+  ],
+  "t": "const only stops reassignment. Use Object.freeze for shallow immutability."
+ },
+ {
+  "q": "What does Promise.all do?",
+  "c": "Waits for all promises and rejects if any rejects",
+  "w": [
+   "Resolves with the fastest promise",
+   "Runs promises one by one",
+   "Ignores rejections"
+  ],
+  "t": "Promise.allSettled waits for all without rejecting. Promise.race returns the first to settle."
+ },
+ {
+  "q": "What does the event loop do?",
+  "c": "Runs queued callbacks when the call stack is empty",
+  "w": [
+   "Loops DOM events forever",
+   "Compiles JavaScript",
+   "Runs multiple threads"
+  ],
+  "t": "JavaScript runs on one thread and the event loop schedules callbacks."
+ },
+ {
+  "q": "What is the output order? setTimeout(() => console.log(\"a\"), 0); Promise.resolve().then(() => console.log(\"b\")); console.log(\"c\");",
+  "c": "c, b, a",
+  "w": [
+   "a, b, c",
+   "c, a, b",
+   "b, c, a"
+  ],
+  "t": "Synchronous code runs first, then microtasks (promises), then timers."
+ },
+ {
+  "q": "What does optional chaining like user?.address?.city avoid?",
+  "c": "Errors when part of the chain is null or undefined",
+  "w": [
+   "Slow loops",
+   "Memory leaks",
+   "Type conversion"
+  ],
+  "t": "If something in the chain is null or undefined, the whole expression is undefined."
+ },
+ {
+  "q": "What does a ?? b return?",
+  "c": "b only if a is null or undefined",
+  "w": [
+   "b if a is falsy",
+   "a if b is null",
+   "Both joined"
+  ],
+  "t": "?? differs from || because 0 and empty string count as valid values."
+ },
+ {
+  "q": "How do you catch an error from an awaited promise?",
+  "c": "Wrap the await in try/catch",
+  "w": [
+   "Use if/else around await",
+   "Add .error after await",
+   "Use finally only"
+  ],
+  "t": "A rejected promise throws at the await, so try/catch works."
+ },
+ {
+  "q": "What does localStorage store?",
+  "c": "Strings that persist after the browser closes",
+  "w": [
+   "Objects that expire after one hour",
+   "Server-side sessions",
+   "Cookies sent to the server"
+  ],
+  "t": "Values are strings. Use JSON.stringify for objects."
+ }
+]
