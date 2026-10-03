@@ -7,6 +7,17 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.set("trust proxy", 1);
+// If something fails inside a route (for example the database), answer with a clear error instead of crashing or hanging.
+for (const method of ["get", "post", "put"]) {
+  const original = app[method].bind(app);
+  app[method] = (route, ...handlers) => original(route, ...handlers.map((h) =>
+    typeof h === "function" && h.constructor.name === "AsyncFunction"
+      ? async (req, res, next) => {
+          try { await h(req, res, next); }
+          catch (e) { console.error("route error:", req.path, e.message); if (!res.headersSent) res.status(503).json({ error: "The server is busy. Please try again in a moment." }); }
+        }
+      : h));
+}
 app.use(express.json({ limit: "400kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -125,6 +136,43 @@ async function callAI({ tier, system, messages, max_tokens }) {
   const body = await r.json();
   return (body.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
 }
+
+/* ---------- storage: Upstash database if configured (data survives restarts), else local files ---------- */
+const REDIS_URL = (process.env.UPSTASH_REDIS_REST_URL || "").trim().replace(/\/+$/, "").replace(/^(?!https?:\/\/)(?=.)/, "https://");
+const REDIS_TOKEN = (process.env.UPSTASH_REDIS_REST_TOKEN || "").trim();
+const USE_REDIS = !!(REDIS_URL && REDIS_TOKEN);
+async function redis(cmd) {
+  const r = await fetch(REDIS_URL, {
+    method: "POST",
+    headers: { authorization: `Bearer ${REDIS_TOKEN}`, "content-type": "application/json" },
+    body: JSON.stringify(cmd),
+    signal: AbortSignal.timeout(15000),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok || data.error) throw new Error(`database error: ${data.error || "status " + r.status}`);
+  return data.result;
+}
+function pathFor(key) { // keys: users, certificates, messages, state:<id>, gen:<topic>
+  const [kind, id] = key.split(":");
+  if (kind === "state") return path.join(__dirname, "data", "state", `${id}.json`);
+  if (kind === "gen") return path.join(__dirname, "data", "generated", `${id}.json`);
+  return path.join(__dirname, "data", `${kind}.json`);
+}
+async function dbGet(key, fallback) { // throws if the database cannot be reached, so we never overwrite good data by mistake
+  if (USE_REDIS) {
+    const v = await redis(["GET", key]);
+    return v == null ? fallback : JSON.parse(v);
+  }
+  return readJson(pathFor(key), fallback);
+}
+async function dbSet(key, value) {
+  if (USE_REDIS) { await redis(["SET", key, JSON.stringify(value)]); return; }
+  const file = pathFor(key);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(value, null, 2));
+}
+console.log(USE_REDIS ? "Storage: Upstash database (your data survives restarts)" : "Storage: local files in the data folder (erased on Render's free plan)");
+if (USE_REDIS) redis(["PING"]).then(() => console.log("Database connected.")).catch((e) => console.error("Database check failed:", e.message, "<- check UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN"));
 
 /* ---------- tiny in-memory rate limiter ---------- */
 function limiter(max, windowMs) {
@@ -267,12 +315,11 @@ app.post("/api/contact", limiter(5, 10 * 60 * 1000), async (req, res) => {
     return res.status(400).json({ error: "Enter your name, a valid email and a message." });
   }
 
-  // 1) store (swap this for Postgres + Prisma when you add a database)
+  // 1) store the message
   try {
-    let all = [];
-    try { all = JSON.parse(await fs.readFile(MSG_FILE, "utf8")); } catch {}
+    const all = await dbGet("messages", []);
     all.push({ name, email, message, at: new Date().toISOString() });
-    await fs.writeFile(MSG_FILE, JSON.stringify(all, null, 2));
+    await dbSet("messages", all.slice(-500));
   } catch (e) {
     console.error("store error:", e.message);
   }
@@ -364,7 +411,7 @@ function readToken(h) {
 async function authed(req, res, next) {
   const uid = readToken(req.headers?.authorization);
   if (!uid) return res.status(401).json({ error: "Please sign in again." });
-  const users = await readJson(USERS_FILE, []);
+  const users = await dbGet("users", []);
   const user = users.find((u) => u.id === uid);
   if (!user) return res.status(401).json({ error: "Account not found." });
   req.user = user;
@@ -379,19 +426,19 @@ app.post("/api/auth/register", limiter(8, 10 * 60 * 1000), async (req, res) => {
   if (!NAME_RE.test(name)) return res.status(400).json({ error: "Enter your full name using letters only." });
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: "Enter a valid email address." });
   if (password.length < 8 || password.length > 100) return res.status(400).json({ error: "Use a password of at least 8 characters." });
-  const users = await readJson(USERS_FILE, []);
+  const users = await dbGet("users", []);
   if (users.some((u) => u.email === email)) return res.status(409).json({ error: "An account with this email already exists. Sign in instead." });
   const salt = crypto.randomBytes(16).toString("hex");
   const user = { id: crypto.randomUUID(), name, email, salt, hash: (await hashPw(password, salt)).toString("hex"), createdAt: new Date().toISOString() };
   users.push(user);
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+  await dbSet("users", users);
   res.json({ token: makeToken(user.id), user: publicUser(user) });
 });
 
 app.post("/api/auth/login", limiter(10, 10 * 60 * 1000), async (req, res) => {
   const email = String(req.body?.email || "").trim().toLowerCase();
   const password = String(req.body?.password || "");
-  const users = await readJson(USERS_FILE, []);
+  const users = await dbGet("users", []);
   const user = users.find((u) => u.email === email);
   const bad = () => res.status(401).json({ error: "Wrong email or password." });
   if (!user) { await hashPw(password, "0".repeat(32)); return bad(); }
@@ -403,7 +450,7 @@ app.post("/api/auth/login", limiter(10, 10 * 60 * 1000), async (req, res) => {
 app.get("/api/me", limiter(60, 60 * 1000), authed, (req, res) => res.json({ user: publicUser(req.user) }));
 
 app.get("/api/state", limiter(60, 60 * 1000), authed, async (req, res) => {
-  const st = await readJson(path.join(STATE_DIR, `${req.user.id}.json`), null);
+  const st = await dbGet("state:" + req.user.id, null);
   res.json(st || { state: null, updatedAt: 0 });
 });
 
@@ -415,7 +462,7 @@ app.put("/api/state", limiter(60, 60 * 1000), authed, async (req, res) => {
   const text = JSON.stringify(state);
   if (text.length > 300000) return res.status(413).json({ error: "Your saved data is too large. Delete some notes." });
   const updatedAt = Date.now();
-  await fs.writeFile(path.join(STATE_DIR, `${req.user.id}.json`), JSON.stringify({ state, updatedAt }));
+  await dbSet("state:" + req.user.id, { state, updatedAt });
   res.json({ ok: true, updatedAt });
 });
 
@@ -444,7 +491,7 @@ const cleanQ = (q) => ({ q: q.q.trim(), c: q.c.trim(), w: q.w.map((x) => x.trim(
 
 async function loadPool(topicId) {
   const bank = await readJson(path.join(BANK_DIR, `${topicId}.json`), []);
-  const gen = await readJson(path.join(GEN_DIR, `${topicId}.json`), []);
+  const gen = await dbGet("gen:" + topicId, []);
   return { bank, gen, all: [...bank, ...gen].filter(validQ) };
 }
 
@@ -478,7 +525,7 @@ async function ensurePool(topicId, need) {
     const seen = new Set(pool.all.map((q) => norm(q.q)));
     const fresh = [];
     for (const r of results) if (r.status === "fulfilled") for (const q of r.value) { const k = norm(q.q); if (!seen.has(k)) { seen.add(k); fresh.push(q); } }
-    if (fresh.length) await fs.writeFile(path.join(GEN_DIR, `${topicId}.json`), JSON.stringify([...pool.gen, ...fresh], null, 1));
+    if (fresh.length) await dbSet("gen:" + topicId, [...pool.gen, ...fresh]);
   })();
   genLocks.set(topicId, job);
   try { await job; } catch (e) { console.error("generate error:", e.message); } finally { genLocks.delete(topicId); }
@@ -554,26 +601,26 @@ app.post("/api/certificate", limiter(10, 10 * 60 * 1000), async (req, res) => {
   if (missing.length) return res.status(400).json({ error: "You still need to pass: " + missing.map((m) => m.name).join(", ") + "." });
   const topics = track.topics.map((tp) => ({ n: tp.name, p: byTopic.get(tp.id).pct }));
   const avg = Math.round(topics.reduce((a, t) => a + t.p, 0) / topics.length);
-  const all = await readJson(CERT_FILE, []);
+  const all = await dbGet("certificates", []);
   let cert = all.find((c) => c.name === name && c.trackId === trackId && c.skillId === skillId);
   if (!cert) {
     cert = { id: "SB-" + crypto.randomBytes(5).toString("hex").toUpperCase(), name, skillId, trackId, skillName: skill.name, trackName: track.name, avg, topics, date: new Date().toISOString().slice(0, 10) };
     all.push(cert);
-    await fs.writeFile(CERT_FILE, JSON.stringify(all, null, 2));
+    await dbSet("certificates", all);
   }
   res.json({ cert, verifyUrl: PUBLIC_URL ? `${PUBLIC_URL.replace(/\/$/, "")}/?verify=${cert.id}` : "" });
 });
 
 app.get("/api/certificate/:id", limiter(30, 60 * 1000), async (req, res) => {
   if (!/^SB-[A-F0-9]{10}$/.test(req.params.id)) return res.status(404).json({ valid: false });
-  const all = await readJson(CERT_FILE, []);
+  const all = await dbGet("certificates", []);
   const c = all.find((x) => x.id === req.params.id);
   if (!c) return res.status(404).json({ valid: false });
   res.json({ valid: true, cert: c });
 });
 
 app.get("/api/health", (_req, res) =>
-  res.json({ ok: true, jobApiConfigured: JSEARCH_KEYS.length > 0 || !!OWN_KEY, jobProviders: PROVIDERS.map((p) => p[0]), emailConfigured: !!(RESEND_API_KEY && EMAIL_TO), accounts: true, aiProvider: AI_PROVIDER, tutorConfigured: AI_ENABLED, examGeneratorConfigured: AI_ENABLED, certSecretConfigured: !!process.env.CERT_SECRET })
+  res.json({ ok: true, jobApiConfigured: JSEARCH_KEYS.length > 0 || !!OWN_KEY, jobProviders: PROVIDERS.map((p) => p[0]), emailConfigured: !!(RESEND_API_KEY && EMAIL_TO), accounts: true, storage: USE_REDIS ? "database" : "files", aiProvider: AI_PROVIDER, tutorConfigured: AI_ENABLED, examGeneratorConfigured: AI_ENABLED, certSecretConfigured: !!process.env.CERT_SECRET })
 );
 
 const port = process.env.PORT || 3000;
